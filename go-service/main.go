@@ -22,6 +22,14 @@ type User struct {
 	Email string `json:"email"`
 }
 
+var hardcodedUsers = []User{
+	{ID: 1, Name: "Alice", Email: "alice@example.com"},
+	{ID: 2, Name: "Bob", Email: "bob@example.com"},
+	{ID: 3, Name: "Charlie", Email: "charlie@example.com"},
+}
+
+var welcomeMsg = []byte(`{"type":"welcome","message":"Connected to Go chat"}`)
+
 // --- WebSocket hub ---
 
 type Hub struct {
@@ -48,8 +56,12 @@ func (h *Hub) remove(conn *websocket.Conn) {
 
 func (h *Hub) broadcast(msg []byte) {
 	h.mu.Lock()
-	defer h.mu.Unlock()
+	conns := make([]*websocket.Conn, 0, len(h.clients))
 	for conn := range h.clients {
+		conns = append(conns, conn)
+	}
+	h.mu.Unlock()
+	for _, conn := range conns {
 		if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
 			log.Printf("ws broadcast error: %v", err)
 		}
@@ -82,12 +94,7 @@ func pingHandler(c *gin.Context) {
 }
 
 func usersHandler(c *gin.Context) {
-	users := []User{
-		{ID: 1, Name: "Alice", Email: "alice@example.com"},
-		{ID: 2, Name: "Bob", Email: "bob@example.com"},
-		{ID: 3, Name: "Charlie", Email: "charlie@example.com"},
-	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, hardcodedUsers)
 }
 
 func echoHandler(c *gin.Context) {
@@ -118,8 +125,7 @@ func wsHandler(hub *Hub) gin.HandlerFunc {
 		hub.add(conn)
 		defer hub.remove(conn)
 
-		welcome := []byte(`{"type":"welcome","message":"Connected to Go chat"}`)
-		if err := conn.WriteMessage(websocket.TextMessage, welcome); err != nil {
+		if err := conn.WriteMessage(websocket.TextMessage, welcomeMsg); err != nil {
 			log.Printf("ws welcome error: %v", err)
 			return
 		}

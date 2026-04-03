@@ -6,7 +6,7 @@ and produce a comparison table (stdout + results/summary.md).
 
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@ def main() -> None:
     rows: list[tuple[str, ...]] = []
 
     for endpoint, load in _TEST_ORDER:
-        for service, key_prefix in (("Gin", "gin"), ("FastAPI", "fastapi")):
+        for service in ("Gin", "FastAPI"):
             # find the matching key
             canonical_key = next(
                 (k for k, (svc, ep, ld) in _LABEL_MAP.items()

@@ -38,9 +38,10 @@ def pretty(raw: str) -> str:
 
 async def listen(ws: websockets.WebSocketClientProtocol, duration: float) -> None:
     """Receive all messages for *duration* seconds, printing each one."""
-    deadline = asyncio.get_event_loop().time() + duration
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + duration
     while True:
-        remaining = deadline - asyncio.get_event_loop().time()
+        remaining = deadline - loop.time()
         if remaining <= 0:
             break
         try:

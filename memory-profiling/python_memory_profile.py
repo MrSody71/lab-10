@@ -7,6 +7,7 @@ Saves results to memory_results/python_memory.json.
 
 import asyncio
 import json
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -75,17 +76,18 @@ def monitor_memory(pid: int, duration: float) -> list[dict]:
     samples: list[dict] = []
     end = time.monotonic() + duration
     while time.monotonic() < end:
+        t0 = time.monotonic()
         try:
             mem = proc.memory_info()
             samples.append({
-                "timestamp": round(time.monotonic(), 3),
+                "timestamp": round(t0, 3),
                 "rss_mb": mb(mem.rss),
                 "vms_mb": mb(mem.vms),
             })
         except psutil.NoSuchProcess:
             print("  [WARN] FastAPI process disappeared during monitoring")
             break
-        time.sleep(1)
+        time.sleep(max(0, 1 - (time.monotonic() - t0)))
     return samples
 
 
@@ -117,7 +119,6 @@ def main() -> None:
           f"while sending {LOAD_REQUESTS} requests …")
 
     # Run memory monitor in the main thread; load in asyncio
-    import threading
     load_result: dict = {}
 
     def _run_load():

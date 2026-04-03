@@ -11,6 +11,7 @@ Heap endpoint: http://localhost:6060/debug/pprof/heap
 import asyncio
 import json
 import re
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +22,7 @@ from tabulate import tabulate
 GO_URL = "http://localhost:8080"
 PPROF_URL = "http://localhost:6060"
 HEAP_ENDPOINT = f"{PPROF_URL}/debug/pprof/heap"
+PPROF_INDEX   = f"{PPROF_URL}/debug/pprof/"
 MONITOR_SECONDS = 30
 LOAD_REQUESTS = 100
 RESULTS_DIR = Path(__file__).parent / "memory_results"
@@ -107,7 +109,7 @@ def sample_loop(duration: float) -> list[dict]:
     with httpx.Client() as client:
         # Check pprof is reachable before starting
         try:
-            client.get(f"{PPROF_URL}/debug/pprof/", timeout=3).raise_for_status()
+            client.get(PPROF_INDEX, timeout=3).raise_for_status()
         except Exception as exc:
             print(f"  ERROR: pprof not reachable at {PPROF_URL} — {exc}")
             print("  See go_pprof_guide.md to enable pprof in the Go service.")
@@ -150,7 +152,6 @@ def main() -> None:
     print(f"[{datetime.now():%H:%M:%S}] Starting {MONITOR_SECONDS}s profile "
           f"with {LOAD_REQUESTS} concurrent requests …")
 
-    import threading
     load_result: dict = {}
 
     def _run_load():

@@ -52,9 +52,10 @@ async def listen_window(
 ) -> int:
     """Drain incoming messages for *duration* seconds. Returns count received."""
     count = 0
-    deadline = asyncio.get_event_loop().time() + duration
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + duration
     while True:
-        remaining = deadline - asyncio.get_event_loop().time()
+        remaining = deadline - loop.time()
         if remaining <= 0:
             break
         try:

@@ -87,22 +87,21 @@ def _unavailable(detail: str = "go-service unavailable") -> JSONResponse:
     return JSONResponse(status_code=503, content={"error": detail})
 
 
-async def _get(path: str) -> httpx.Response:
-    """GET from Go service, raising HTTPException on transport errors."""
+async def _request(method: str, path: str, **kwargs) -> httpx.Response:
+    """Forward a request to the Go service; raise _GoUnavailable on transport errors."""
     try:
-        return await http_client.get(path)
+        return await http_client.request(method, path, **kwargs)
     except httpx.TransportError as exc:
-        logger.error("Transport error calling %s: %s", path, exc)
+        logger.error("Transport error calling %s %s: %s", method, path, exc)
         raise _GoUnavailable() from exc
+
+
+async def _get(path: str) -> httpx.Response:
+    return await _request("GET", path)
 
 
 async def _post(path: str, payload: dict) -> httpx.Response:
-    """POST to Go service, raising _GoUnavailable on transport errors."""
-    try:
-        return await http_client.post(path, json=payload)
-    except httpx.TransportError as exc:
-        logger.error("Transport error calling %s: %s", path, exc)
-        raise _GoUnavailable() from exc
+    return await _request("POST", path, json=payload)
 
 
 class _GoUnavailable(Exception):

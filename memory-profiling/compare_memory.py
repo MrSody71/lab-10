@@ -29,7 +29,8 @@ def load(path: Path) -> dict:
         else:
             print("    python go_memory_profile.py")
         raise SystemExit(1)
-    return json.loads(path.read_text())
+    with path.open(encoding="utf-8") as f:
+        return json.load(f)
 
 
 def _val(data: dict, *keys, default=None):
@@ -60,7 +61,7 @@ def build_rows(py: dict, go: dict) -> list[list]:
         pv = _val(py, *py_path)
         gv = _val(go, *go_path)
         if pv is None or gv is None:
-            diff = winner = "N/A"
+            winner = "N/A"
         else:
             diff = round(pv - gv, 2)
             if abs(diff) < 0.5:
