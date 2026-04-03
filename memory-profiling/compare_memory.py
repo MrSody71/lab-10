@@ -6,7 +6,6 @@ print a side-by-side comparison table, and summarise which service is leaner.
 """
 
 import json
-import sys
 from pathlib import Path
 
 from tabulate import tabulate
