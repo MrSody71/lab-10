@@ -1,0 +1,42 @@
+# Go binaries
+go-service/server
+go-service/server.exe
+go-service/go-service
+go-service/go-service.exe
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Profiling artifacts
+*.prof
+*.pprof
+heap.prof
+cpu.prof
+
+# Benchmark results (generated at runtime)
+benchmark/results/
+
+# Memory profiling results (generated at runtime)
+memory-profiling/memory_results/
+
+# Python virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# pip
+*.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
